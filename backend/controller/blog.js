@@ -3,7 +3,12 @@ import { Blogs, validateBlog } from "../module/blogSchema.js";
 class BlogsController {
   async get(req, res) {
     try {
-      const blogs = await Blogs.find();
+      const blogs = await Blogs.find().populate([
+        {
+          path: "userId",
+          select: ["fnmae", "lname"],
+        },
+      ]);
       if (!blogs.length) {
         return res.status(400).json({
           msg: "Blog is not defined",
@@ -34,9 +39,75 @@ class BlogsController {
           payload: null,
         });
       }
-      const blog = await Blogs.create(req.body);
+      const blog = await Blogs.create({ ...req.body, userId: req.user._id });
       res.status(201).json({
         msg: "Blog is created",
+        variant: "success",
+        payload: blog,
+      });
+    } catch {
+      res.status(500).json({
+        msg: "Server error",
+        variant: "error",
+        payload: null,
+      });
+    }
+  }
+  async getBlogSearch(req, res) {
+    try {
+      let { value = "", limit = 10 } = req.query; // Set a default limit if not provided
+      let text = value.trim();
+      if (!text) {
+        return res.status(400).json({
+          msg: "Please provide a search query.",
+          variant: "error",
+          payload: null,
+        });
+      }
+      const blogs = await Blogs.find({
+        $or: [
+          { title: { $regex: text, $options: "i" } },
+          { desc: { $regex: text, $options: "i" } },
+        ],
+      }).limit(parseInt(limit)); // Ensure limit is a number
+
+      if (!blogs.length) {
+        return res.status(404).json({
+          msg: "No blogs found.",
+          variant: "error",
+          payload: null,
+        });
+      }
+
+      res.status(200).json({
+        msg: "Blogs found.",
+        variant: "success",
+        payload: blogs,
+      });
+    } catch (error) {
+      console.error(error); // Log the error for debugging purposes
+      res.status(500).json({
+        msg: "Server error.",
+        variant: "error",
+        payload: null,
+      });
+    }
+  }
+  async delete(req, res) {
+    try {
+      const { id } = req.params;
+      const existBlog = await Blogs.findById(id);
+      if (!existBlog) {
+        return res.status(400).json({
+          msg: "Blog is not defined",
+          variant: "warning",
+          payload: null,
+        });
+      }
+      const blog = await Blogs.findByIdAndDelete(id, { new: true });
+
+      res.status(200).json({
+        msg: "Blog is deleted",
         variant: "success",
         payload: blog,
       });

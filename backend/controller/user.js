@@ -69,7 +69,6 @@ class UsersController {
   }
   async updatePassword(req, res) {
     try {
-      // Foydalanuvchini bazadan topish
       const user = await Users.findById(req.user._id);
       if (!user) {
         return res.status(404).json({
@@ -79,7 +78,6 @@ class UsersController {
         });
       }
 
-      // Eski parolni tekshirish
       const isMatch = await bcrypt.compare(req.body.oldPassword, user.password);
       if (!isMatch) {
         return res.status(400).json({
@@ -89,7 +87,6 @@ class UsersController {
         });
       }
 
-      // Yangi parolni xesh qilish va saqlash
       const newHashedPassword = await bcrypt.hash(req.body.newPassword, 10);
       user.password = newHashedPassword;
       await user.save();
@@ -108,7 +105,43 @@ class UsersController {
       });
     }
   }
-
+  async getUserSearch(req, res) {
+    try {
+      let { value = "", limit } = req.query;
+      let text = value.trim();
+      if (!text) {
+        return res.status(400).json({
+          msg: "write something",
+          variant: "error",
+          payload: null,
+        });
+      }
+      const users = await Users.find({
+        $or: [
+          { fname: { $regex: text, $options: "i" } },
+          { username: { $regex: text, $options: "i" } },
+        ],
+      }).limit(limit);
+      if (!users.length) {
+        return res.status(400).json({
+          msg: "user not found",
+          variant: "error",
+          payload: null,
+        });
+      }
+      res.status(200).json({
+        msg: "user found",
+        variant: "success",
+        payload: users,
+      });
+    } catch {
+      res.status(500).json({
+        msg: "server error",
+        variant: "error",
+        payload: null,
+      });
+    }
+  }
   async get(req, res) {
     try {
       const { limit = 10, skip = 1 } = req.query;
@@ -179,7 +212,7 @@ class UsersController {
 
       if (!user) {
         return res.status(400).json({
-          msg: "username xato ",
+          msg: "username in incorrect ",
           variant: "error",
           payload: null,
         });
@@ -187,7 +220,7 @@ class UsersController {
 
       bcrypt.compare(password, user.password, function (err, response) {
         const token = jwt.sign(
-          { _id: user._id, role: "admin" },
+          { _id: user._id, role: user.role },
           process.env.SECRET_KEY
         );
         if (response) {

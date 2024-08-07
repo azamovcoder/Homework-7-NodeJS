@@ -14,6 +14,7 @@ const blogSchema = new Schema(
     },
     userId: {
       type: Schema.Types.ObjectId,
+      ref: "user",
       required: true,
     },
   },
@@ -26,7 +27,7 @@ export const validateBlog = (body) => {
   let schema = Joi.object({
     title: Joi.string().required(),
     desc: Joi.string().required(),
-    userId: Joi.string().required(),
+    userId: Joi.string(),
   });
   return schema.validate(body);
 };

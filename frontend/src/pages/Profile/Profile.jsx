@@ -224,7 +224,7 @@ const Profile = () => {
           </form>
         </Module>
       )}
-      <ToastContainer /> {/* ToastContainer qo'shish */}
+      <ToastContainer /> 
     </Fragment>
   );
 };

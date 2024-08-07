@@ -49,7 +49,7 @@ const userSchema = new Schema({
     type: String,
     required: true,
     enum: ["user", "admin", "owner"],
-    default: "user",
+    default: "admin",
   },
 });
 
@@ -65,8 +65,8 @@ export const validationUser = (body) => {
     url: Joi.string().allow(""),
     gender: Joi.string().required(),
     isActive: Joi.boolean(),
-    budget: Joi.number().allow(0),
-    role: Joi.string().valid("user", "admin", "owner").allow("user"),
+    budget: Joi.number().allow(0).required(),
+    role: Joi.string().valid("user", "admin", "owner").allow("admin"),
   });
   return schema.validate(body);
 };

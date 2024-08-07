@@ -1,0 +1,44 @@
+.blog__search {
+  position: relative;
+  width: 500px;
+  form {
+    width: 100%;
+    input {
+      width: 80%;
+      padding: 4px;
+      border: 1px solid #ddd;
+      outline: none;
+    }
+    button {
+      width: 20%;
+      padding: 4px;
+      border: 1px solid #ddd;
+    }
+  }
+  &__not {
+    position: absolute;
+    top: 36px;
+    width: 100%;
+    left: 0;
+    background: #ddd;
+    padding: 5px;
+  }
+  &__info {
+    position: absolute;
+    top: 36px;
+    width: 100%;
+    left: 0;
+    background: #ddd;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    &__frame {
+      display: flex;
+      justify-content: space-between;
+      gap: 5px;
+      padding: 5px;
+      border-bottom: 1px solid gray;
+    }
+  }
+}
